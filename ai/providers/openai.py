@@ -56,7 +56,9 @@ class OpenAI_API(BaseAPIProvider):
             logger.info(f"[OpenAI] Initializing OpenAI client...")
             self.client = openai.OpenAI(api_key=self.api_key)
 
-            logger.info(f"[OpenAI] Making API request to {self.current_model}...")
+            logger.info(
+                f"[OpenAI] Making API request to {self.current_model} with web_search tool..."
+            )
             logger.debug(f"[OpenAI] System content: {system_content[:200]}...")
             logger.debug(f"[OpenAI] Prompt: {prompt[:200]}...")
 
@@ -66,6 +68,7 @@ class OpenAI_API(BaseAPIProvider):
                     {"role": "developer", "content": system_content},
                     {"role": "user", "content": prompt},
                 ],
+                tools=[{"type": "web_search"}],
                 max_output_tokens=self.MODELS[self.current_model]["max_tokens"],
             )
 
