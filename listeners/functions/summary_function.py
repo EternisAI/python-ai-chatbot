@@ -1,7 +1,10 @@
-from ai.providers import get_provider_response
 from logging import Logger
-from slack_bolt import Complete, Fail, Ack
+
+from slack_bolt import Ack, Complete, Fail
 from slack_sdk import WebClient
+
+from ai.providers import get_provider_response
+
 from ..listener_utils.listener_constants import SUMMARIZE_CHANNEL_WORKFLOW
 from ..listener_utils.parse_conversation import parse_conversation
 
@@ -21,18 +24,20 @@ def handle_summary_function_callback(
     complete: Complete,
 ):
     ack()
-    
+
     user_context = inputs.get("user_context", {})
     channel_id = inputs.get("channel_id")
     user_id = user_context.get("id", "unknown")
-    
-    logger.info(f"[summary_function] Summary request from user {user_id} for channel {channel_id}")
-    
+
+    logger.info(
+        f"[summary_function] Summary request from user {user_id} for channel {channel_id}"
+    )
+
     try:
         logger.info(f"[summary_function] Fetching channel history...")
-        history = client.conversations_history(channel=channel_id, limit=10)["messages"]
+        history = client.conversations_history(channel=channel_id, limit=30)["messages"]
         logger.info(f"[summary_function] Retrieved {len(history)} messages")
-        
+
         logger.info(f"[summary_function] Parsing conversation...")
         conversation = parse_conversation(history)
         logger.info(f"[summary_function] Parsed {len(conversation)} conversation items")
@@ -48,5 +53,7 @@ def handle_summary_function_callback(
         complete({"user_context": user_context, "response": summary})
         logger.info(f"[summary_function] Workflow completed successfully!")
     except Exception as e:
-        logger.error(f"[summary_function] ERROR: {type(e).__name__}: {str(e)}", exc_info=True)
+        logger.error(
+            f"[summary_function] ERROR: {type(e).__name__}: {str(e)}", exc_info=True
+        )
         fail(e)
