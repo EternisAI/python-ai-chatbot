@@ -24,7 +24,7 @@ Your responses will be displayed in Slack. Use Slack's mrkdwn formatting:
 - Code: `code`
 - Code block: ```code block```
 - Lists: Use • or - for bullets
-- Links: <url|text>
+- Links: <url|text> (you must not use markdown notation for links)
 Do NOT use **double asterisks** for bold - use *single asterisks* only.
 """
 
@@ -40,6 +40,6 @@ Your responses will be displayed in Slack. Use Slack's mrkdwn formatting:
 - Code: `code`
 - Code block: ```code block```
 - Lists: Use • or - for bullets
-- Links: <url|text>
+- Links: <url|text> (you must not use markdown notation for links)
 Do NOT use **double asterisks** for bold - use *single asterisks* only.
 """
