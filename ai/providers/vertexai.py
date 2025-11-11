@@ -6,7 +6,7 @@ import vertexai.generative_models
 
 from .base_provider import BaseAPIProvider
 
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -89,13 +89,21 @@ class VertexAPI(BaseAPIProvider):
             return {}
 
     def generate_response(self, prompt: str, system_content: str) -> str:
+        logger.info(f"[VertexAI] Generating response with model: {self.current_model}")
+        logger.info(f"[VertexAI] Enabled: {self.enabled}")
+        logger.info(f"[VertexAI] Prompt length: {len(prompt)}")
+        logger.info(f"[VertexAI] System content length: {len(system_content)}")
+        
         system_instruction = None
         if self.MODELS[self.current_model]["system_instruction_supported"]:
             system_instruction = system_content
+            logger.info(f"[VertexAI] Using system instruction")
         else:
             prompt = system_content + "\n" + prompt
+            logger.info(f"[VertexAI] Prepending system content to prompt")
 
         try:
+            logger.info(f"[VertexAI] Initializing GenerativeModel...")
             self.client = vertexai.generative_models.GenerativeModel(
                 model_name=self.current_model,
                 generation_config={
@@ -103,29 +111,45 @@ class VertexAPI(BaseAPIProvider):
                 },
                 system_instruction=system_instruction,
             )
+            
+            logger.info(f"[VertexAI] Making API request...")
+            logger.debug(f"[VertexAI] Prompt: {prompt[:200]}...")
+            
             response = self.client.generate_content(
                 contents=prompt,
             )
-            return "".join(part.text for part in response.candidates[0].content.parts)
+            
+            logger.info(f"[VertexAI] API request successful!")
+            logger.info(f"[VertexAI] Response type: {type(response)}")
+            logger.debug(f"[VertexAI] Response object: {response}")
+            
+            result = "".join(part.text for part in response.candidates[0].content.parts)
+            logger.info(f"[VertexAI] Output text length: {len(result)}")
+            logger.debug(f"[VertexAI] Output text preview: {result[:200]}...")
+            
+            return result
 
         except google.api_core.exceptions.Unauthorized as e:
-            logger.error(f"Client is not Authorized. {e.reason}, {e.message}")
+            logger.error(f"[VertexAI] Client is not Authorized. {e.reason}, {e.message}", exc_info=True)
             raise e
         except google.api_core.exceptions.Forbidden as e:
-            logger.error(f"Client Forbidden. {e.reason}, {e.message}")
+            logger.error(f"[VertexAI] Client Forbidden. {e.reason}, {e.message}", exc_info=True)
             raise e
         except google.api_core.exceptions.TooManyRequests as e:
-            logger.error(f"Too many requests. {e.reason}, {e.message}")
+            logger.error(f"[VertexAI] Too many requests. {e.reason}, {e.message}", exc_info=True)
             raise e
         except google.api_core.exceptions.ClientError as e:
-            logger.error(f"Client error: {e.reason}, {e.message}")
+            logger.error(f"[VertexAI] Client error: {e.reason}, {e.message}", exc_info=True)
             raise e
         except google.api_core.exceptions.ServerError as e:
-            logger.error(f"Server error: {e.reason}, {e.message}")
+            logger.error(f"[VertexAI] Server error: {e.reason}, {e.message}", exc_info=True)
             raise e
         except google.api_core.exceptions.GoogleAPICallError as e:
-            logger.error(f"Error: {e.reason}, {e.message}")
+            logger.error(f"[VertexAI] Error: {e.reason}, {e.message}", exc_info=True)
             raise e
         except google.api_core.exceptions.GoogleAPIError as e:
-            logger.error(f"Unknown error. {e}")
+            logger.error(f"[VertexAI] Unknown error. {e}", exc_info=True)
+            raise e
+        except Exception as e:
+            logger.error(f"[VertexAI] Unexpected error: {type(e).__name__}: {str(e)}", exc_info=True)
             raise e

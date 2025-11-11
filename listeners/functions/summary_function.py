@@ -21,17 +21,32 @@ def handle_summary_function_callback(
     complete: Complete,
 ):
     ack()
+    
+    user_context = inputs.get("user_context", {})
+    channel_id = inputs.get("channel_id")
+    user_id = user_context.get("id", "unknown")
+    
+    logger.info(f"[summary_function] Summary request from user {user_id} for channel {channel_id}")
+    
     try:
-        user_context = inputs["user_context"]
-        channel_id = inputs["channel_id"]
+        logger.info(f"[summary_function] Fetching channel history...")
         history = client.conversations_history(channel=channel_id, limit=10)["messages"]
+        logger.info(f"[summary_function] Retrieved {len(history)} messages")
+        
+        logger.info(f"[summary_function] Parsing conversation...")
         conversation = parse_conversation(history)
+        logger.info(f"[summary_function] Parsed {len(conversation)} conversation items")
 
+        logger.info(f"[summary_function] Generating summary...")
         summary = get_provider_response(
-            user_context["id"], SUMMARIZE_CHANNEL_WORKFLOW, conversation
+            user_id, SUMMARIZE_CHANNEL_WORKFLOW, conversation
         )
+        logger.info(f"[summary_function] Summary generated (length: {len(summary)})")
+        logger.debug(f"[summary_function] Summary preview: {summary[:200]}...")
 
+        logger.info(f"[summary_function] Completing workflow...")
         complete({"user_context": user_context, "response": summary})
+        logger.info(f"[summary_function] Workflow completed successfully!")
     except Exception as e:
-        logger.exception(e)
+        logger.error(f"[summary_function] ERROR: {type(e).__name__}: {str(e)}", exc_info=True)
         fail(e)

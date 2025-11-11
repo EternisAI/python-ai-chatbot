@@ -6,7 +6,9 @@ from .anthropic import AnthropicAPI
 from .openai import OpenAI_API
 from .vertexai import VertexAPI
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 """
@@ -50,18 +52,47 @@ def get_provider_response(
     context: Optional[List] = [],
     system_content=DEFAULT_SYSTEM_CONTENT,
 ):
-    formatted_context = "\n".join([f"{msg['user']}: {msg['text']}" for msg in context])
-    full_prompt = f"Prompt: {prompt}\nContext: {formatted_context}"
+    logger.info(f"[get_provider_response] Starting for user: {user_id}")
+    logger.info(f"[get_provider_response] Prompt length: {len(prompt)}")
+    logger.info(f"[get_provider_response] Context items: {len(context)}")
+    logger.debug(f"[get_provider_response] Prompt: {prompt[:200]}...")
+
     try:
+        formatted_context = "\n".join(
+            [f"{msg['user']}: {msg['text']}" for msg in context]
+        )
+        full_prompt = f"Prompt: {prompt}\nContext: {formatted_context}"
+
+        logger.info(f"[get_provider_response] Full prompt length: {len(full_prompt)}")
+        logger.debug(
+            f"[get_provider_response] Formatted context: {formatted_context[:200]}..."
+        )
+
         # Use GPT-5 for all users
         provider_name = "openai"
         model_name = "gpt-5-chat-latest"
         logger.info(
-            f"Using model: {model_name} from provider: {provider_name} for user: {user_id}"
+            f"[get_provider_response] Using model: {model_name} from provider: {provider_name} for user: {user_id}"
         )
+
+        logger.info(f"[get_provider_response] Initializing provider: {provider_name}")
         provider = _get_provider(provider_name)
+
+        logger.info(f"[get_provider_response] Setting model: {model_name}")
         provider.set_model(model_name)
+
+        logger.info(f"[get_provider_response] Calling provider.generate_response()...")
         response = provider.generate_response(full_prompt, system_content)
+
+        logger.info(
+            f"[get_provider_response] Response received! Length: {len(response)}"
+        )
+        logger.debug(f"[get_provider_response] Response preview: {response[:200]}...")
+
         return response
     except Exception as e:
+        logger.error(
+            f"[get_provider_response] ERROR: {type(e).__name__}: {str(e)}",
+            exc_info=True,
+        )
         raise e
