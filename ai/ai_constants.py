@@ -18,7 +18,7 @@ YOU MUST BE CONSISE. EVERY WORD THAT IS UNNESCESSARY SHOULD BE REMOVED.
 
 IMPORTANT - Slack Formatting:
 Your responses will be displayed in Slack. Use Slack's mrkdwn formatting:
-- Bold: *text* (single asterisks)
+- Bold: *text* (single asterisks) (You must never use double asterisks for bold)
 - Italic: _text_ (underscores)
 - Strikethrough: ~text~
 - Code: `code`
@@ -34,7 +34,7 @@ You are the user's helpful AI assistant.
 
 IMPORTANT - Slack Formatting:
 Your responses will be displayed in Slack. Use Slack's mrkdwn formatting:
-- Bold: *text* (single asterisks)
+- Bold: *text* (single asterisks)  (You must never use double asterisks for bold)
 - Italic: _text_ (underscores)
 - Strikethrough: ~text~
 - Code: `code`
