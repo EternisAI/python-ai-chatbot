@@ -1,7 +1,9 @@
-import openai
-from .base_provider import BaseAPIProvider
-import os
 import logging
+import os
+
+import openai
+
+from .base_provider import BaseAPIProvider
 
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
@@ -21,6 +23,11 @@ class OpenAI_API(BaseAPIProvider):
             "max_tokens": 10000,
         },
         "o4-mini": {"name": "o4-mini", "provider": "OpenAI", "max_tokens": 50000},
+        "gpt-5-chat-latest": {
+            "name": "gpt-5-chat-latest",
+            "provider": "OpenAI",
+            "max_tokens": 200000,
+        },
     }
 
     def __init__(self):

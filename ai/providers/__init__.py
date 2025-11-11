@@ -1,11 +1,13 @@
+import logging
 from typing import List, Optional
-
-from state_store.get_user_state import get_user_state
 
 from ..ai_constants import DEFAULT_SYSTEM_CONTENT
 from .anthropic import AnthropicAPI
 from .openai import OpenAI_API
 from .vertexai import VertexAPI
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 """
 New AI providers must be added below.
@@ -51,7 +53,12 @@ def get_provider_response(
     formatted_context = "\n".join([f"{msg['user']}: {msg['text']}" for msg in context])
     full_prompt = f"Prompt: {prompt}\nContext: {formatted_context}"
     try:
-        provider_name, model_name = get_user_state(user_id, False)
+        # Use GPT-5 for all users
+        provider_name = "openai"
+        model_name = "gpt-5-chat-latest"
+        logger.info(
+            f"Using model: {model_name} from provider: {provider_name} for user: {user_id}"
+        )
         provider = _get_provider(provider_name)
         provider.set_model(model_name)
         response = provider.generate_response(full_prompt, system_content)
