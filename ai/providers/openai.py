@@ -25,8 +25,8 @@ class OpenAI_API(BaseAPIProvider):
             "max_tokens": 10000,
         },
         "o4-mini": {"name": "o4-mini", "provider": "OpenAI", "max_tokens": 50000},
-        "gpt-5-chat-latest": {
-            "name": "gpt-5-chat-latest",
+        "gpt-5.1-chat-latest": {
+            "name": "gpt-5.1-chat-latest",
             "provider": "OpenAI",
             "max_tokens": 200000,
         },
