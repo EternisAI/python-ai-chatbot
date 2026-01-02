@@ -25,8 +25,8 @@ class OpenAI_API(BaseAPIProvider):
             "max_tokens": 10000,
         },
         "o4-mini": {"name": "o4-mini", "provider": "OpenAI", "max_tokens": 50000},
-        "gpt-5.2-chat-latest": {
-            "name": "gpt-5.2-chat-latest",
+        "gpt-5.2": {
+            "name": "gpt-5.2",
             "provider": "OpenAI",
             "max_tokens": 200000,
         },
@@ -62,15 +62,23 @@ class OpenAI_API(BaseAPIProvider):
             logger.debug(f"[OpenAI] System content: {system_content[:200]}...")
             logger.debug(f"[OpenAI] Prompt: {prompt[:200]}...")
 
-            response = self.client.responses.create(
-                model=self.current_model,
-                input=[
+            # Check if user wants deep reasoning
+            request_params = {
+                "model": self.current_model,
+                "input": [
                     {"role": "developer", "content": system_content},
                     {"role": "user", "content": prompt},
                 ],
-                tools=[{"type": "web_search"}],
-                max_output_tokens=self.MODELS[self.current_model]["max_tokens"],
-            )
+                "tools": [{"type": "web_search"}],
+                "max_output_tokens": self.MODELS[self.current_model]["max_tokens"],
+            }
+
+            # Add high reasoning effort if "think" is in the prompt
+            if "think" in prompt.lower():
+                request_params["reasoning"] = {"effort": "high"}
+                logger.info("[OpenAI] Reasoning effort set to HIGH due to 'think' in prompt")
+
+            response = self.client.responses.create(**request_params)
 
             logger.info(f"[OpenAI] API request successful!")
             logger.info(f"[OpenAI] Response type: {type(response)}")

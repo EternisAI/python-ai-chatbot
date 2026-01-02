@@ -98,7 +98,7 @@ def get_provider_response(
 
         # Use GPT-5 for all users
         provider_name = "openai"
-        model_name = "gpt-5.2-chat-latest"
+        model_name = "gpt-5.2"
         logger.info(
             f"[get_provider_response] Using model: {model_name} from provider: {provider_name} for user: {user_id}"
         )

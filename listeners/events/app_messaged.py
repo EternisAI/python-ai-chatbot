@@ -7,6 +7,7 @@ from ai.ai_constants import DM_SYSTEM_CONTENT
 from ai.providers import get_provider_response
 
 from ..listener_utils.listener_constants import DEFAULT_LOADING_TEXT
+from ..listener_utils.message_utils import send_long_message
 from ..listener_utils.parse_conversation import parse_conversation
 
 """
@@ -59,8 +60,12 @@ def app_messaged_callback(client: WebClient, event: dict, logger: Logger, say: S
             logger.debug(f"[app_messaged] Response content: {response[:200]}...")
 
             logger.info(f"[app_messaged] Updating message with response...")
-            client.chat_update(
-                channel=channel_id, ts=waiting_message["ts"], text=response
+            send_long_message(
+                client,
+                channel_id,
+                thread_ts or waiting_message["ts"],
+                waiting_message["ts"],
+                response,
             )
             logger.info(f"[app_messaged] Message successfully updated!")
     except Exception as e:

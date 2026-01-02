@@ -9,6 +9,7 @@ from ..listener_utils.listener_constants import (
     DEFAULT_LOADING_TEXT,
     MENTION_WITHOUT_TEXT,
 )
+from ..listener_utils.message_utils import send_long_message
 from ..listener_utils.parse_conversation import parse_conversation
 
 """
@@ -63,8 +64,8 @@ def app_mentioned_callback(client: WebClient, event: dict, logger: Logger, say: 
             logger.debug(f"[app_mentioned] Response content: {response[:200]}...")
 
             logger.info(f"[app_mentioned] Updating message with response...")
-            client.chat_update(
-                channel=channel_id, ts=waiting_message["ts"], text=response
+            send_long_message(
+                client, channel_id, thread_ts, waiting_message["ts"], response
             )
             logger.info(f"[app_mentioned] Message successfully updated!")
         else:
