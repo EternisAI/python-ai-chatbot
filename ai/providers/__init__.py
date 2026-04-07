@@ -1,7 +1,10 @@
+import base64
 import logging
 import re
 from datetime import datetime
 from typing import List, Optional
+
+import requests
 
 from ..ai_constants import DEFAULT_SYSTEM_CONTENT
 from .anthropic import AnthropicAPI
@@ -69,12 +72,30 @@ def _get_provider(provider_name: str):
         raise ValueError(f"Unknown provider: {provider_name}")
 
 
+def download_slack_images(image_urls: List[str], bot_token: str) -> List[dict]:
+    """Download images from Slack and return as base64 data URIs."""
+    images = []
+    headers = {"Authorization": f"Bearer {bot_token}"}
+    for url in image_urls:
+        try:
+            resp = requests.get(url, headers=headers, timeout=10)
+            resp.raise_for_status()
+            content_type = resp.headers.get("Content-Type", "image/png")
+            b64 = base64.b64encode(resp.content).decode("utf-8")
+            images.append({"url": f"data:{content_type};base64,{b64}"})
+            logger.info(f"[download_slack_images] Downloaded image from {url[:80]}...")
+        except Exception as e:
+            logger.error(f"[download_slack_images] Failed to download {url}: {e}")
+    return images
+
+
 def get_provider_response(
     user_id: str,
     prompt: str,
     context: Optional[List] = [],
     system_content=DEFAULT_SYSTEM_CONTENT,
     image_urls: Optional[List[str]] = None,
+    bot_token: Optional[str] = None,
 ):
     logger.info(f"[get_provider_response] Starting for user: {user_id}")
     logger.info(f"[get_provider_response] Prompt length: {len(prompt)}")
@@ -92,11 +113,12 @@ def get_provider_response(
             f"[get_provider_response] Formatted context: {formatted_context[:200]}..."
         )
 
-        # Pass image URLs directly to the provider
+        # Download images from Slack and convert to base64
         images = []
-        if image_urls:
-            images = [{"url": url} for url in image_urls]
-            logger.info(f"[get_provider_response] Including {len(images)} image URLs")
+        if image_urls and bot_token:
+            logger.info(f"[get_provider_response] Downloading {len(image_urls)} images...")
+            images = download_slack_images(image_urls, bot_token)
+            logger.info(f"[get_provider_response] Successfully downloaded {len(images)} images")
 
         # Add current date to system prompt
         current_date = datetime.now().strftime("%A, %B %d, %Y")

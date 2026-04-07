@@ -67,6 +67,7 @@ def app_mentioned_callback(client: WebClient, event: dict, logger: Logger, say: 
             response = get_provider_response(
                 user_id, text, conversation_context,
                 image_urls=image_urls if include_images else None,
+                bot_token=client.token if include_images else None,
             )
             logger.info(
                 f"[app_mentioned] Received response from provider (length: {len(response)})"
