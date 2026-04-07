@@ -74,6 +74,7 @@ def get_provider_response(
     prompt: str,
     context: Optional[List] = [],
     system_content=DEFAULT_SYSTEM_CONTENT,
+    image_urls: Optional[List[str]] = None,
 ):
     logger.info(f"[get_provider_response] Starting for user: {user_id}")
     logger.info(f"[get_provider_response] Prompt length: {len(prompt)}")
@@ -91,6 +92,12 @@ def get_provider_response(
             f"[get_provider_response] Formatted context: {formatted_context[:200]}..."
         )
 
+        # Pass image URLs directly to the provider
+        images = []
+        if image_urls:
+            images = [{"url": url} for url in image_urls]
+            logger.info(f"[get_provider_response] Including {len(images)} image URLs")
+
         # Add current date to system prompt
         current_date = datetime.now().strftime("%A, %B %d, %Y")
         system_content_with_date = f"{system_content}\n\nCurrent date: {current_date}"
@@ -98,7 +105,7 @@ def get_provider_response(
 
         # Use GPT-5 for all users
         provider_name = "openai"
-        model_name = "gpt-5.2"
+        model_name = "gpt-5.4"
         logger.info(
             f"[get_provider_response] Using model: {model_name} from provider: {provider_name} for user: {user_id}"
         )
@@ -110,7 +117,7 @@ def get_provider_response(
         provider.set_model(model_name)
 
         logger.info(f"[get_provider_response] Calling provider.generate_response()...")
-        response = provider.generate_response(full_prompt, system_content_with_date)
+        response = provider.generate_response(full_prompt, system_content_with_date, images=images)
 
         logger.info(
             f"[get_provider_response] Response received! Length: {len(response)}"

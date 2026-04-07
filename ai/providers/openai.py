@@ -25,8 +25,8 @@ class OpenAI_API(BaseAPIProvider):
             "max_tokens": 10000,
         },
         "o4-mini": {"name": "o4-mini", "provider": "OpenAI", "max_tokens": 50000},
-        "gpt-5.2": {
-            "name": "gpt-5.2",
+        "gpt-5.4": {
+            "name": "gpt-5.4",
             "provider": "OpenAI",
             "max_tokens": 200000,
         },
@@ -46,11 +46,12 @@ class OpenAI_API(BaseAPIProvider):
         else:
             return {}
 
-    def generate_response(self, prompt: str, system_content: str) -> str:
+    def generate_response(self, prompt: str, system_content: str, images: list = None) -> str:
         logger.info(f"[OpenAI] Generating response with model: {self.current_model}")
         logger.info(f"[OpenAI] API key present: {bool(self.api_key)}")
         logger.info(f"[OpenAI] Prompt length: {len(prompt)}")
         logger.info(f"[OpenAI] System content length: {len(system_content)}")
+        logger.info(f"[OpenAI] Images included: {len(images) if images else 0}")
 
         try:
             logger.info(f"[OpenAI] Initializing OpenAI client...")
@@ -62,12 +63,20 @@ class OpenAI_API(BaseAPIProvider):
             logger.debug(f"[OpenAI] System content: {system_content[:200]}...")
             logger.debug(f"[OpenAI] Prompt: {prompt[:200]}...")
 
+            # Build user content with optional images
+            if images:
+                user_content = [{"type": "input_text", "text": prompt}]
+                for img in images:
+                    user_content.append({"type": "input_image", "image_url": img["url"]})
+            else:
+                user_content = prompt
+
             # Check if user wants deep reasoning
             request_params = {
                 "model": self.current_model,
                 "input": [
                     {"role": "developer", "content": system_content},
-                    {"role": "user", "content": prompt},
+                    {"role": "user", "content": user_content},
                 ],
                 "tools": [{"type": "web_search"}],
                 "max_output_tokens": self.MODELS[self.current_model]["max_tokens"],

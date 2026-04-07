@@ -8,7 +8,7 @@ from ai.providers import get_provider_response
 
 from ..listener_utils.listener_constants import DEFAULT_LOADING_TEXT
 from ..listener_utils.message_utils import send_long_message
-from ..listener_utils.parse_conversation import parse_conversation
+from ..listener_utils.parse_conversation import parse_conversation, extract_image_urls
 
 """
 Handles the event when a direct message is sent to the bot, retrieves the conversation context,
@@ -50,9 +50,20 @@ def app_messaged_callback(client: WebClient, event: dict, logger: Logger, say: S
                 f"[app_messaged] Waiting message sent with ts: {waiting_message.get('ts')}"
             )
 
+            # Check if user wants images included
+            include_images = "include images" in text.lower()
+            image_urls = []
+            if include_images:
+                if thread_ts:
+                    image_urls = extract_image_urls(conversation)
+                # Also include images from the current message itself
+                image_urls.extend(extract_image_urls([event]))
+                logger.info(f"[app_messaged] Including {len(image_urls)} images from conversation")
+
             logger.info(f"[app_messaged] Calling get_provider_response...")
             response = get_provider_response(
-                user_id, text, conversation_context, DM_SYSTEM_CONTENT
+                user_id, text, conversation_context, DM_SYSTEM_CONTENT,
+                image_urls=image_urls if include_images else None,
             )
             logger.info(
                 f"[app_messaged] Received response from provider (length: {len(response)})"

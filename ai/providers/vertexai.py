@@ -88,7 +88,7 @@ class VertexAPI(BaseAPIProvider):
         else:
             return {}
 
-    def generate_response(self, prompt: str, system_content: str) -> str:
+    def generate_response(self, prompt: str, system_content: str, images: list = None) -> str:
         logger.info(f"[VertexAI] Generating response with model: {self.current_model}")
         logger.info(f"[VertexAI] Enabled: {self.enabled}")
         logger.info(f"[VertexAI] Prompt length: {len(prompt)}")

@@ -45,7 +45,7 @@ class AnthropicAPI(BaseAPIProvider):
         else:
             return {}
 
-    def generate_response(self, prompt: str, system_content: str) -> str:
+    def generate_response(self, prompt: str, system_content: str, images: list = None) -> str:
         logger.info(f"[Anthropic] Generating response with model: {self.current_model}")
         logger.info(f"[Anthropic] API key present: {bool(self.api_key)}")
         logger.info(f"[Anthropic] Prompt length: {len(prompt)}")
