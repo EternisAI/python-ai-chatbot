@@ -129,9 +129,13 @@ def get_provider_response(
             f"[get_provider_response] Formatted context: {formatted_context[:200]}..."
         )
 
-        # Download images from Slack and convert to base64
+        # Download images from Slack and convert to base64 (limit to last 5)
+        MAX_IMAGES = 5
         images = []
         if image_files and bot_token:
+            if len(image_files) > MAX_IMAGES:
+                logger.info(f"[get_provider_response] Limiting images from {len(image_files)} to last {MAX_IMAGES}")
+                image_files = image_files[-MAX_IMAGES:]
             logger.info(f"[get_provider_response] Downloading {len(image_files)} images...")
             images = download_slack_images(image_files, bot_token)
             logger.info(f"[get_provider_response] Successfully downloaded {len(images)} images")
