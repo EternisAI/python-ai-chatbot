@@ -130,7 +130,7 @@ def get_provider_response(
         )
 
         # Download images from Slack and convert to base64 (limit to last 5)
-        MAX_IMAGES = 10
+        MAX_IMAGES = 15
         images = []
         if image_files and bot_token:
             if len(image_files) > MAX_IMAGES:
