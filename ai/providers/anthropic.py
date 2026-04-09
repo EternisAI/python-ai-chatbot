@@ -74,9 +74,14 @@ class AnthropicAPI(BaseAPIProvider):
             
             result = response.content[0].text
             logger.info(f"[Anthropic] Output text length: {len(result)}")
+            logger.info(f"[Anthropic] Usage: input={response.usage.input_tokens}, output={response.usage.output_tokens}")
             logger.debug(f"[Anthropic] Output text preview: {result[:200]}...")
-            
-            return result
+
+            return {
+                "text": result,
+                "input_tokens": response.usage.input_tokens,
+                "output_tokens": response.usage.output_tokens,
+            }
         except anthropic.APIConnectionError as e:
             logger.error(f"[Anthropic] Server could not be reached: {e.__cause__}", exc_info=True)
             raise e

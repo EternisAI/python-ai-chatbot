@@ -155,18 +155,25 @@ def get_provider_response(
         provider.set_model(model_name)
 
         logger.info(f"[get_provider_response] Calling provider.generate_response()...")
-        response = provider.generate_response(full_prompt, system_content_with_date, images=images)
+        result = provider.generate_response(full_prompt, system_content_with_date, images=images)
+
+        text = result["text"]
+        input_tokens = result["input_tokens"]
+        output_tokens = result["output_tokens"]
 
         logger.info(
-            f"[get_provider_response] Response received! Length: {len(response)}"
+            f"[get_provider_response] Response received! Length: {len(text)}"
         )
-        logger.debug(f"[get_provider_response] Response preview: {response[:200]}...")
+        logger.debug(f"[get_provider_response] Response preview: {text[:200]}...")
 
         # Convert markdown formatting to Slack format
-        response = convert_markdown_to_slack(response)
+        text = convert_markdown_to_slack(text)
         logger.info(f"[get_provider_response] Converted to Slack formatting")
 
-        return response
+        # Append token usage footer
+        text += f"\n\n_Tokens: {input_tokens:,} in / {output_tokens:,} out_"
+
+        return text
     except Exception as e:
         logger.error(
             f"[get_provider_response] ERROR: {type(e).__name__}: {str(e)}",

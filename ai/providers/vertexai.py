@@ -124,10 +124,15 @@ class VertexAPI(BaseAPIProvider):
             logger.debug(f"[VertexAI] Response object: {response}")
             
             result = "".join(part.text for part in response.candidates[0].content.parts)
+            usage = response.usage_metadata
             logger.info(f"[VertexAI] Output text length: {len(result)}")
             logger.debug(f"[VertexAI] Output text preview: {result[:200]}...")
-            
-            return result
+
+            return {
+                "text": result,
+                "input_tokens": usage.prompt_token_count,
+                "output_tokens": usage.candidates_token_count,
+            }
 
         except google.api_core.exceptions.Unauthorized as e:
             logger.error(f"[VertexAI] Client is not Authorized. {e.reason}, {e.message}", exc_info=True)

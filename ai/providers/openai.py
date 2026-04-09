@@ -46,7 +46,7 @@ class OpenAI_API(BaseAPIProvider):
         else:
             return {}
 
-    def generate_response(self, prompt: str, system_content: str, images: list = None) -> str:
+    def generate_response(self, prompt: str, system_content: str, images: list = None) -> dict:
         logger.info(f"[OpenAI] Generating response with model: {self.current_model}")
         logger.info(f"[OpenAI] API key present: {bool(self.api_key)}")
         logger.info(f"[OpenAI] Prompt length: {len(prompt)}")
@@ -94,10 +94,16 @@ class OpenAI_API(BaseAPIProvider):
             logger.debug(f"[OpenAI] Response object: {response}")
 
             result = response.output_text
+            usage = response.usage
             logger.info(f"[OpenAI] Output text length: {len(result)}")
+            logger.info(f"[OpenAI] Usage: input={usage.input_tokens}, output={usage.output_tokens}")
             logger.debug(f"[OpenAI] Output text preview: {result[:200]}...")
 
-            return result
+            return {
+                "text": result,
+                "input_tokens": usage.input_tokens,
+                "output_tokens": usage.output_tokens,
+            }
         except openai.APIConnectionError as e:
             logger.error(
                 f"[OpenAI] Server could not be reached: {e.__cause__}", exc_info=True
