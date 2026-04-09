@@ -77,15 +77,25 @@ def download_slack_images(image_files: List[dict], bot_token: str) -> List[dict]
 
     image_files: list of {"url": str, "mimetype": str} from Slack file objects.
     Uses the Slack file mimetype (not the HTTP Content-Type) for the data URI.
+    Rejects responses that aren't actually image data.
     """
     images = []
     headers = {"Authorization": f"Bearer {bot_token}"}
     for img_file in image_files:
-        url = img_file["url"]
+        url = img_file.get("url")
+        if not url:
+            continue
         mimetype = img_file["mimetype"]
         try:
             resp = requests.get(url, headers=headers, timeout=10)
             resp.raise_for_status()
+
+            # Reject if Slack returned HTML/text instead of image bytes
+            header_type = (resp.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+            if header_type.startswith("text/"):
+                logger.warning(f"[download_slack_images] Got text response instead of image from {url[:80]}")
+                continue
+
             b64 = base64.b64encode(resp.content).decode("utf-8")
             data_uri = f"data:{mimetype};base64,{b64}"
             images.append({"url": data_uri})

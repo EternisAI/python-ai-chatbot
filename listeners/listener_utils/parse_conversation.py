@@ -11,8 +11,6 @@ and formats it as a string with user IDs and their messages.
 Used in `app_mentioned_callback`, `dm_sent_callback`,
 and `handle_summary_function_callback`."""
 
-IMAGE_MIMETYPES = {"image/png", "image/jpeg", "image/gif", "image/webp"}
-
 
 def parse_conversation(conversation: SlackResponse) -> Optional[List[dict]]:
     parsed = []
@@ -31,9 +29,9 @@ def extract_image_files(conversation: SlackResponse) -> List[dict]:
     """Extract image file info (url + mimetype) from conversation messages."""
     images = []
     for message in conversation:
-        files = message.get("files", [])
-        for f in files:
-            mimetype = f.get("mimetype", "")
-            if mimetype in IMAGE_MIMETYPES and f.get("url_private"):
-                images.append({"url": f["url_private"], "mimetype": mimetype})
+        for f in (message.get("files") or []):
+            mimetype = (f.get("mimetype") or "").split(";")[0].strip().lower()
+            url = f.get("url_private_download") or f.get("url_private")
+            if url and mimetype.startswith("image/"):
+                images.append({"url": url, "mimetype": mimetype})
     return images
