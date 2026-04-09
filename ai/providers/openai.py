@@ -28,7 +28,7 @@ class OpenAI_API(BaseAPIProvider):
         "gpt-5.4": {
             "name": "gpt-5.4",
             "provider": "OpenAI",
-            "max_tokens": 16000,
+            "max_tokens": 200000,
         },
     }
 
