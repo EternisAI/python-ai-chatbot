@@ -10,7 +10,7 @@ from ..listener_utils.listener_constants import (
     MENTION_WITHOUT_TEXT,
 )
 from ..listener_utils.message_utils import send_long_message
-from ..listener_utils.parse_conversation import parse_conversation, extract_image_urls
+from ..listener_utils.parse_conversation import parse_conversation, extract_image_files
 
 """
 Handles the event when the app is mentioned in a Slack channel, retrieves the conversation context,
@@ -58,15 +58,15 @@ def app_mentioned_callback(client: WebClient, event: dict, logger: Logger, say: 
 
             # Check if user wants images included
             include_images = "include images" in text.lower()
-            image_urls = []
+            image_files = []
             if include_images:
-                image_urls = extract_image_urls(conversation)
-                logger.info(f"[app_mentioned] Including {len(image_urls)} images from conversation")
+                image_files = extract_image_files(conversation)
+                logger.info(f"[app_mentioned] Including {len(image_files)} images from conversation")
 
             logger.info(f"[app_mentioned] Calling get_provider_response...")
             response = get_provider_response(
                 user_id, text, conversation_context,
-                image_urls=image_urls if include_images else None,
+                image_files=image_files if include_images else None,
                 bot_token=client.token if include_images else None,
             )
             logger.info(

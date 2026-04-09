@@ -27,12 +27,13 @@ def parse_conversation(conversation: SlackResponse) -> Optional[List[dict]]:
         return None
 
 
-def extract_image_urls(conversation: SlackResponse) -> List[str]:
-    """Extract private image URLs from conversation messages that have file attachments."""
-    image_urls = []
+def extract_image_files(conversation: SlackResponse) -> List[dict]:
+    """Extract image file info (url + mimetype) from conversation messages."""
+    images = []
     for message in conversation:
         files = message.get("files", [])
         for f in files:
-            if f.get("mimetype", "") in IMAGE_MIMETYPES and f.get("url_private"):
-                image_urls.append(f["url_private"])
-    return image_urls
+            mimetype = f.get("mimetype", "")
+            if mimetype in IMAGE_MIMETYPES and f.get("url_private"):
+                images.append({"url": f["url_private"], "mimetype": mimetype})
+    return images
