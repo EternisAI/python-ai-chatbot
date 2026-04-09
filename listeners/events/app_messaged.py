@@ -55,10 +55,17 @@ def app_messaged_callback(client: WebClient, event: dict, logger: Logger, say: S
             image_files = []
             if include_images:
                 if thread_ts:
+                    for i, msg in enumerate(conversation):
+                        files = msg.get("files")
+                        if files:
+                            logger.info(f"[app_messaged] Message {i} has {len(files)} files: {[{k: f.get(k) for k in ('id', 'name', 'mimetype', 'url_private', 'url_private_download', 'file_access')} for f in files]}")
                     image_files = extract_image_files(conversation)
+
                 # Also include images from the current message itself
+                event_files = event.get("files")
+                logger.info(f"[app_messaged] Current event files: {event_files}")
                 image_files.extend(extract_image_files([event]))
-                logger.info(f"[app_messaged] Including {len(image_files)} images from conversation")
+                logger.info(f"[app_messaged] Total extracted image files: {len(image_files)}: {image_files}")
 
             logger.info(f"[app_messaged] Calling get_provider_response...")
             response = get_provider_response(

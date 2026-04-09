@@ -60,8 +60,16 @@ def app_mentioned_callback(client: WebClient, event: dict, logger: Logger, say: 
             include_images = "include images" in text.lower()
             image_files = []
             if include_images:
+                # Debug: log raw files from each message
+                for i, msg in enumerate(conversation):
+                    files = msg.get("files")
+                    if files:
+                        logger.info(f"[app_mentioned] Message {i} has {len(files)} files: {[{k: f.get(k) for k in ('id', 'name', 'mimetype', 'url_private', 'url_private_download', 'file_access')} for f in files]}")
+                    else:
+                        logger.info(f"[app_mentioned] Message {i} has no files. Keys: {list(msg.keys())}")
+
                 image_files = extract_image_files(conversation)
-                logger.info(f"[app_mentioned] Including {len(image_files)} images from conversation")
+                logger.info(f"[app_mentioned] Extracted {len(image_files)} image files: {image_files}")
 
             logger.info(f"[app_mentioned] Calling get_provider_response...")
             response = get_provider_response(
