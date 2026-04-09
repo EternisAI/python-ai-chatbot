@@ -1,7 +1,7 @@
 # Utility functions for handling Slack message operations
 
-# Slack's message limit is 4,000 characters, use 3,900 to be safe
-MAX_MESSAGE_LENGTH = 3900
+# Slack's message limit is 4,000 characters, use 3,500 to be safe
+MAX_MESSAGE_LENGTH = 3500
 
 
 def split_message(text: str, max_length: int = MAX_MESSAGE_LENGTH) -> list[str]:
