@@ -101,10 +101,11 @@ def app_mentioned_callback(client: WebClient, event: dict, logger: Logger, say: 
         )
         if waiting_message:
             try:
+                error_text = f"Received an error from Bolty:\n{type(e).__name__}: {str(e)[:500]}"
                 client.chat_update(
                     channel=channel_id,
                     ts=waiting_message["ts"],
-                    text=f"Received an error from Bolty:\n{type(e).__name__}: {e}",
+                    text=error_text,
                 )
             except Exception as update_error:
                 logger.error(
